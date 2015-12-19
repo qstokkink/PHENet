@@ -111,17 +111,4 @@ public class Paillier {
 		return L(data.modPow(key.getLambda(), key.getN().multiply(key.getN())), key.getN()).multiply(key.getMu()).mod(key.getN());
 	}
 
-	public static void main(String[] args){
-		PaillierKeyPair kp = PaillierKeyPair.forceGenerate(true);
-		Paillier pfull = new Paillier(kp);
-		
-		//BigInteger enc = Paillier.encode(kp.getPublicKey(), BigInteger.valueOf(12345678L));
-		BigInteger enc1 = pfull.encode(BigInteger.valueOf(12340000L));
-		BigInteger enc2 = pfull.encode(BigInteger.valueOf(5678L));
-		BigInteger enc = enc1.multiply(enc2).mod(kp.getPublicKey().getN().multiply(kp.getPublicKey().getN()));
-		
-		//BigInteger dec = Paillier.decode(kp.getPrivateKey(), enc);
-		BigInteger dec = pfull.decode(enc);
-		System.out.println(dec);
-	}
 }
