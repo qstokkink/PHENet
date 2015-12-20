@@ -63,7 +63,7 @@ public class PaillierKeyPair {
 		BigInteger g = fast ? generateGFast(n) : generateG(n);
 		BigInteger mu = L(g.modPow(lambda, n2), n).modInverse(n);
 		
-		return new PaillierKeyPair(new PaillierPublicKey(n, g), new PaillierPrivateKey(lambda, mu, n), new PaillierEPrivateKey(lambda, mu, n, p, q, g));
+		return new PaillierKeyPair(new PaillierPublicKey(bits, n, g), new PaillierPrivateKey(bits, lambda, mu, n), new PaillierEPrivateKey(bits, lambda, mu, n, p, q, g));
 	}
 
 	/**

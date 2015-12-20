@@ -8,11 +8,17 @@ import java.math.BigInteger;
 public class PaillierPrivateKey{
 
 	private final BigInteger lambda, mu, n;
+	private final int bitspace;
 	
-	public PaillierPrivateKey(BigInteger lambda, BigInteger mu, BigInteger n){
+	public PaillierPrivateKey(int bitspace, BigInteger lambda, BigInteger mu, BigInteger n){
+		this.bitspace = bitspace;
 		this.lambda = lambda;
 		this.mu = mu;
 		this.n = n;
+	}
+	
+	public int getBitspace(){
+		return bitspace;
 	}
 	
 	public BigInteger getLambda(){

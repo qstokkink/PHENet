@@ -9,8 +9,8 @@ public class PaillierEPrivateKey extends PaillierPrivateKey{
 
 	private final BigInteger p, q, g;
 	
-	public PaillierEPrivateKey(BigInteger lambda, BigInteger mu, BigInteger n, BigInteger p, BigInteger q, BigInteger g){
-		super(lambda, mu, n);
+	public PaillierEPrivateKey(int bitspace, BigInteger lambda, BigInteger mu, BigInteger n, BigInteger p, BigInteger q, BigInteger g){
+		super(bitspace, lambda, mu, n);
 		this.p = p;
 		this.q = q;
 		this.g = g;

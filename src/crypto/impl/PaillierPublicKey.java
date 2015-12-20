@@ -8,10 +8,16 @@ import java.math.BigInteger;
 public class PaillierPublicKey {
 
 	private final BigInteger n,g;
+	private final int bitspace;
 	
-	public PaillierPublicKey(BigInteger n, BigInteger g){
+	public PaillierPublicKey(int bitspace, BigInteger n, BigInteger g){
+		this.bitspace = bitspace;
 		this.n = n;
 		this.g = g;
+	}
+	
+	public int getBitspace(){
+		return bitspace;
 	}
 	
 	public BigInteger getN(){
