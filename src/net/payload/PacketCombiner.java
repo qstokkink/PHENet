@@ -40,7 +40,6 @@ public class PacketCombiner {
 	/**
 	 * Combine another raw packet and see if the message can be constructed yet
 	 * 
-	 * @param key The Private Key
 	 * @param p The packet to add
 	 * @return Whether the block of this sequence number is complete
 	 * @throws IllegalPacketException If the packet is malformed
@@ -63,7 +62,6 @@ public class PacketCombiner {
 	/**
 	 * Decrypt the message formed by all read partial packets
 	 * 
-	 * @param key The Private Key
 	 * @return The decrypted message
 	 * @throws InvalidKeyException If the AES key decoded incorrectly
 	 * @throws IllegalBlockSizeException If the data blocks were malformed
