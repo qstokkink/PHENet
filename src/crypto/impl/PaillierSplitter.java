@@ -33,7 +33,7 @@ public class PaillierSplitter {
 	}
 	
 	/**
-	 * Given multiple homomorphicly partitioned ciphertexts, combine these (multiplication)
+	 * Given multiple homomorphically partitioned ciphertexts, combine these (multiplication)
 	 * 
 	 * @param split The homomorphic partitions
 	 * @param n The modulus

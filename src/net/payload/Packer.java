@@ -113,7 +113,7 @@ public class Packer {
 		
 		byte[] bHomo = new byte[key.getBitspace()+1];
 		if (is.read(bHomo) != bHomo.length)
-			throw new EOFException("Reached end of stream while parsing homomorphicly encrypted key");
+			throw new EOFException("Reached end of stream while parsing homomorphically encrypted key");
 		BigInteger biHomo = new BigInteger(bHomo);
 		
 		byte[] bHash = new byte[32];
