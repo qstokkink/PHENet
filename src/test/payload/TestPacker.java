@@ -35,7 +35,7 @@ public class TestPacker {
 	/**
 	 * The buffer for random data
 	 */
-	byte[] data = new byte[1024];
+	byte[] data = new byte[1024*1024];
 	
 	/**
 	 * The amount of partitions to create
@@ -50,21 +50,30 @@ public class TestPacker {
 	@Test
 	public void test() throws IllegalBlockSizeException, IOException, IllegalPacketException, InvalidKeyException, BadPaddingException {
 		byte[][] packed = Packer.pack(keyPair.getPublicKey(), HOMOMORPHISMLEVEL, 1, data);
-		PacketCombiner combiner = new PacketCombiner(1);
+		PacketCombiner combiner = new PacketCombiner(keyPair.getPrivateKey(), 1);
 		boolean finished = false;
 		
 		// Simulate messages arriving on different channels
 		for (byte[] message : packed){
 			ByteArrayInputStream bis = new ByteArrayInputStream(message);
 			RawPacket raw = Packer.read(keyPair.getPrivateKey(), bis);
-			finished |= combiner.read(keyPair.getPrivateKey(), raw);
+			finished |= combiner.read(raw);
 		}
 		
 		assertTrue(finished);
 		
-		byte[] decrypted = combiner.finish(keyPair.getPrivateKey());
+		byte[] decrypted = combiner.finish();
 		
 		assertArrayEquals(data, decrypted);
+	}
+	
+	@Test(expected=IllegalPacketException.class)
+	public void testBadSequence() throws IllegalBlockSizeException, IOException, IllegalPacketException, InvalidKeyException, BadPaddingException {
+		byte[][] packed = Packer.pack(keyPair.getPublicKey(), HOMOMORPHISMLEVEL, 2, data);
+		PacketCombiner combiner = new PacketCombiner(keyPair.getPrivateKey(), 1);
+		
+		ByteArrayInputStream bis = new ByteArrayInputStream(packed[0]);
+		combiner.read(Packer.read(keyPair.getPrivateKey(), bis));
 	}
 
 }

@@ -25,11 +25,16 @@ public class PacketCombiner {
 	private BigInteger Kt = BigInteger.ONE;
 	private BigInteger Khash = null;
 	
+	private BigInteger n2;
+	private Paillier paillier;
+	
 	/**
 	 * Link this combiner to a certain sequence number
 	 */
-	public PacketCombiner(int sequenceNumber){
+	public PacketCombiner(PaillierPrivateKey key, int sequenceNumber){
 		this.sequenceNumber = sequenceNumber;
+		this.paillier = new Paillier(key);
+		this.n2 = key.getN().multiply(key.getN());
 	}
 	
 	/**
@@ -40,7 +45,7 @@ public class PacketCombiner {
 	 * @return Whether the block of this sequence number is complete
 	 * @throws IllegalPacketException If the packet is malformed
 	 */
-	public boolean read(PaillierPrivateKey key, RawPacket p) throws IllegalPacketException{
+	public boolean read(RawPacket p) throws IllegalPacketException{
 		if (sequenceNumber != p.getSequenceNumber())
 			throw new IllegalPacketException("Tried to combine packet with seq.no. " + p.getSequenceNumber() + 
 												" into " + sequenceNumber);
@@ -50,9 +55,9 @@ public class PacketCombiner {
 			Khash = p.getKeyHash();
 		}
 		
-		Kt = Kt.multiply(p.getPartKey()).mod(key.getN().multiply(key.getN()));
+		Kt = Kt.multiply(p.getPartKey()).mod(n2);
 		packets.add(p);
-		return SHA256.test(Paillier.decode(key, Kt).toByteArray(), Khash.toByteArray());
+		return SHA256.test(paillier.decode(Kt).toByteArray(), Khash.toByteArray());
 	}
 	
 	/**
@@ -64,8 +69,8 @@ public class PacketCombiner {
 	 * @throws IllegalBlockSizeException If the data blocks were malformed
 	 * @throws BadPaddingException If the data blocks were malformed
 	 */
-	public byte[] finish(PaillierPrivateKey key) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException{
-		AESKey K = new AESKey(Paillier.decode(key, Kt));
+	public byte[] finish() throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException{
+		AESKey K = new AESKey(paillier.decode(Kt));
 		// Reorder the encrypted message
 		RawPacket[] ordered = new RawPacket[packets.size()];
 		int size = 0;

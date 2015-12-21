@@ -67,7 +67,7 @@ public class Packer {
 			}
 			
 			ByteBuffer bSeq = ByteBuffer.allocate(4).putInt(sequenceNumber);
-			ByteBuffer bHomo = ByteBuffer.allocate(key.getBitspace()).put(packBigInteger(parts[i], key.getBitspace()));
+			ByteBuffer bHomo = ByteBuffer.allocate(key.getBitspace()+1).put(packBigInteger(parts[i], key.getBitspace()+1));
 			ByteBuffer bHash = ByteBuffer.allocate(32).put(packBigInteger(Khash, 32));
 			ByteBuffer bKi = ByteBuffer.allocate(16).put(EKi);
 			ByteBuffer bEKMi = ByteBuffer.wrap(Mparts[i]);
@@ -111,7 +111,7 @@ public class Packer {
 			throw new EOFException("Reached end of stream while parsing packet sequence number");
 		int iSeq = ByteBuffer.wrap(bSeq).getInt();
 		
-		byte[] bHomo = new byte[key.getBitspace()];
+		byte[] bHomo = new byte[key.getBitspace()+1];
 		if (is.read(bHomo) != bHomo.length)
 			throw new EOFException("Reached end of stream while parsing homomorphicly encrypted key");
 		BigInteger biHomo = new BigInteger(bHomo);
