@@ -17,7 +17,6 @@ import net.payload.RawPacket;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import crypto.impl.PaillierKeyPair;
 
 public class TestPacker {
@@ -47,8 +46,24 @@ public class TestPacker {
 		new Random().nextBytes(data);
 	}
 	
+	@Test(expected=IllegalPacketException.class)
+	public void testBadSequence() throws IllegalBlockSizeException, IOException, IllegalPacketException, InvalidKeyException, BadPaddingException {
+		byte[][] packed = Packer.pack(keyPair.getPublicKey(), HOMOMORPHISMLEVEL, 2, data);
+		PacketCombiner combiner = new PacketCombiner(keyPair.getPrivateKey(), 1);
+		
+		ByteArrayInputStream bis = new ByteArrayInputStream(packed[0]);
+		combiner.read(Packer.read(keyPair.getPrivateKey(), bis));
+	}
+	
 	@Test
-	public void test() throws IllegalBlockSizeException, IOException, IllegalPacketException, InvalidKeyException, BadPaddingException {
+	public void testEncrypt() throws IllegalBlockSizeException {
+		byte[][] packed = Packer.pack(keyPair.getPublicKey(), HOMOMORPHISMLEVEL, 1, data);
+
+		assertEquals(HOMOMORPHISMLEVEL, packed.length);
+	}
+	
+	@Test
+	public void testEncryptDecrypt() throws IllegalBlockSizeException, IOException, IllegalPacketException, InvalidKeyException, BadPaddingException {
 		byte[][] packed = Packer.pack(keyPair.getPublicKey(), HOMOMORPHISMLEVEL, 1, data);
 		PacketCombiner combiner = new PacketCombiner(keyPair.getPrivateKey(), 1);
 		boolean finished = false;
@@ -67,13 +82,4 @@ public class TestPacker {
 		assertArrayEquals(data, decrypted);
 	}
 	
-	@Test(expected=IllegalPacketException.class)
-	public void testBadSequence() throws IllegalBlockSizeException, IOException, IllegalPacketException, InvalidKeyException, BadPaddingException {
-		byte[][] packed = Packer.pack(keyPair.getPublicKey(), HOMOMORPHISMLEVEL, 2, data);
-		PacketCombiner combiner = new PacketCombiner(keyPair.getPrivateKey(), 1);
-		
-		ByteArrayInputStream bis = new ByteArrayInputStream(packed[0]);
-		combiner.read(Packer.read(keyPair.getPrivateKey(), bis));
-	}
-
 }
