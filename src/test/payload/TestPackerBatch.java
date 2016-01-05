@@ -8,6 +8,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Random;
 
 import javax.crypto.BadPaddingException;
@@ -19,7 +20,10 @@ import net.payload.PacketCombiner;
 import net.payload.RawPacket;
 
 import org.junit.Test;
+import org.junit.runner.Description;
+import org.junit.runner.JUnitCore;
 import org.junit.runner.RunWith;
+import org.junit.runner.notification.RunListener;
 import org.junit.runners.Parameterized;
 
 import crypto.impl.PaillierKeyPair;
@@ -41,9 +45,19 @@ public class TestPackerBatch {
 	private static PaillierKeyPair keyPair = PaillierKeyPair.forceGenerate(KEYSIZE, true);
 	
 	/**
+	 * Size in bytes of the random data
+	 */
+	private static int DATASIZE = 8192*1024;
+	
+	/**
+	 * Amount of times to repeat each experiment
+	 */
+	private static int REPETITIONS = 20;
+	
+	/**
 	 * The amount of partitions to create
 	 */
-	private int HOMOMORPHISMLEVEL = 8;
+	private int HOMOMORPHISMLEVEL;
 	
 	/**
 	 * Packed data to decrypt
@@ -70,7 +84,7 @@ public class TestPackerBatch {
 		ArrayList<Object[]> out = new ArrayList<Object[]>();
 		for (int i = 4; i <= 16; i += 4){
 			for (int r = 0; r < 20; r++){
-				byte[] data = new byte[1024*1024];
+				byte[] data = new byte[DATASIZE];
 				new Random().nextBytes(data);
 				try {
 					out.add(new Object[] {Integer.valueOf(i), data, Packer.pack(keyPair.getPublicKey(), i, 1, data)});
@@ -107,5 +121,63 @@ public class TestPackerBatch {
 		byte[] decrypted = combiner.finish();
 		
 		assertArrayEquals(DATA, decrypted);
+	}
+	
+	/**
+	 * If the default JUnit core is not used,
+	 * Aggregate results, also provide a fancy loadbar
+	 */
+	public static void main(String[] args){
+		JUnitCore core= new JUnitCore();
+		final HashMap<String, Long> runtimes = new HashMap<String, Long>();
+		RunListener listener = new RunListener(){
+			private long stime = 0;
+			
+			@Override
+			public void testStarted(Description description) throws Exception {
+				super.testStarted(description);
+				String group = getGroup(description.getMethodName());
+				if (!runtimes.containsKey(group))
+					runtimes.put(group, 0L);
+				stime = System.currentTimeMillis();
+			}
+			
+			@Override
+			public void testFinished(Description description) throws Exception {
+				super.testFinished(description);
+				long etime = System.currentTimeMillis() - stime;
+				String group = getGroup(description.getMethodName());
+				runtimes.put(group, runtimes.get(group) + etime);
+				System.out.print("*");
+			}
+			
+			private String getName(String raw){
+				return raw.substring(0, raw.indexOf('['));
+			}
+			
+			private int getNumber(String raw){
+				return Integer.valueOf(raw.substring(raw.indexOf('[')+1, raw.indexOf(']')));
+			}
+			
+			private String getGroup(String raw){
+				return getName(raw) + ((((int) getNumber(raw)/REPETITIONS) + 1)*4);
+			}
+		};
+	    core.addListener(listener);
+	    
+	    // Generate a fancy loading bar
+	    String sloadbar = "====";
+	    StringBuilder loadbar = new StringBuilder();
+	    for (int i = 0; i < REPETITIONS*2; i++)
+	    	loadbar.append(sloadbar);
+	    System.out.println("Preparing experiment, please be patient");
+	    System.out.println(loadbar.toString());
+	    core.run(TestPackerBatch.class);
+		System.out.println();
+		System.out.println(loadbar.toString());
+		
+		for (String group : runtimes.keySet()){
+			System.out.println(group + ": " + (runtimes.get(group)/1000.0d)/REPETITIONS + "s");
+		}
 	}
 }
