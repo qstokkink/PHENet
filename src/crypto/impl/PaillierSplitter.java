@@ -1,7 +1,7 @@
 package crypto.impl;
 
 import java.math.BigInteger;
-import java.util.Random;
+import java.security.SecureRandom;
 
 /**
  * Class for creating an additively homomorphic split of a message
@@ -22,13 +22,18 @@ public class PaillierSplitter {
 		assert(amount > 1);
 		BigInteger[] out = new BigInteger[amount];
 		BigInteger total = BigInteger.ZERO;
+		SecureRandom sr = new SecureRandom();
 		for (int i = 1; i < amount; i++){
-			out[i] = new BigInteger(keysize, new Random());
-			total = total.add(out[i]).mod(n);
+			out[i] = new BigInteger(keysize, sr);
+			if (i < amount - 1)
+				total = total.add(out[i]).mod(n);
 		}
-		out[0] = data.subtract(total);
-		if (out[0].compareTo(n) <= 0)
+		out[0] = data.subtract(out[amount - 1]);
+		if (out[0].compareTo(n) < 0)
 			out[0].add(n);
+		out[amount - 1] = out[amount - 1].subtract(total);
+		if (out[amount - 1].compareTo(n) < 0)
+			out[amount - 1].add(n);
 		return out;
 	}
 	
