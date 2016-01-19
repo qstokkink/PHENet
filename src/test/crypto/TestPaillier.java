@@ -1,7 +1,7 @@
 package test.crypto;
 
 import static org.junit.Assert.*;
-import static crypto.impl.PaillierSplitter.*;
+import static crypto.impl.AdditiveSplitter.*;
 
 import java.math.BigInteger;
 

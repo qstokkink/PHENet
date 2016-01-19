@@ -83,7 +83,7 @@ public class TestPackerBatch {
 	public static ArrayList<Object[]> generateData() {
 		ArrayList<Object[]> out = new ArrayList<Object[]>();
 		for (int i = 4; i <= 16; i += 4){
-			for (int r = 0; r < 20; r++){
+			for (int r = 0; r < REPETITIONS; r++){
 				byte[] data = new byte[DATASIZE];
 				new Random().nextBytes(data);
 				try {

@@ -18,7 +18,7 @@ import crypto.impl.AESSplitter;
 import crypto.impl.Paillier;
 import crypto.impl.PaillierPrivateKey;
 import crypto.impl.PaillierPublicKey;
-import crypto.impl.PaillierSplitter;
+import crypto.impl.AdditiveSplitter;
 import crypto.impl.SHA256;
 
 public class Packer {
@@ -41,7 +41,7 @@ public class Packer {
 	public static byte[][] pack(PaillierPublicKey key, int partitions, int sequenceNumber, byte[] datablock) throws IllegalBlockSizeException {
 		// Generate a block key, partition and hash it
 		AESKey K = new AESKey(SYMM_KEY_SIZE);
-		BigInteger[] parts = PaillierSplitter.split(K.getKeyBigInteger(), key.getBitspace(), partitions, key.getN());
+		BigInteger[] parts = AdditiveSplitter.split(K.getKeyBigInteger(), key.getBitspace(), partitions, key.getN());
 		for (int i = 0; i < parts.length; i++)
 			parts[i] = Paillier.encode(key, parts[i]);
 		BigInteger Khash = SHA256.hash(K.getKeyBigInteger());

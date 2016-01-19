@@ -3,17 +3,13 @@ package crypto.impl;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
-/**
- * Class for creating an additively homomorphic split of a message
- * and to combine ciphertexts
- */
-public class PaillierSplitter {
+public class MultiplicativeSplitter {
 
 	/**
-	 * Split plaintext into multiple plaintexts for additive homomorphism
+	 * Split plaintext into multiple plaintexts for multiplicative homomorphism
 	 * 
 	 * @param data The plaintext to split
-	 * @param keysize The keysize (modulo)
+	 * @param keysize The keysize in bits, of the modulus
 	 * @param amount The amount of partitions to create
 	 * @param n The modulus
 	 * @return The partial plaintexts 
@@ -21,19 +17,15 @@ public class PaillierSplitter {
 	public static BigInteger[] split(BigInteger data, int keysize, int amount, BigInteger n){
 		assert(amount > 1);
 		BigInteger[] out = new BigInteger[amount];
-		BigInteger total = BigInteger.ZERO;
+		BigInteger total = BigInteger.ONE;
 		SecureRandom sr = new SecureRandom();
 		for (int i = 1; i < amount; i++){
 			out[i] = new BigInteger(keysize, sr);
 			if (i < amount - 1)
-				total = total.add(out[i]).mod(n);
+				total = total.multiply(out[i]).mod(n);
 		}
-		out[0] = data.subtract(out[amount - 1]);
-		if (out[0].compareTo(n) < 0)
-			out[0].add(n);
-		out[amount - 1] = out[amount - 1].subtract(total);
-		if (out[amount - 1].compareTo(n) < 0)
-			out[amount - 1].add(n);
+		out[0] = BigInteger.ONE.add(data.modInverse(n).multiply(out[amount - 1])).multiply(total).modInverse(n);
+		out[amount - 1] = out[amount - 1].add(data).mod(n); 
 		return out;
 	}
 	
@@ -49,4 +41,5 @@ public class PaillierSplitter {
 			total = total.multiply(bi).mod(n.multiply(n));
 		return total;
 	}
+	
 }
